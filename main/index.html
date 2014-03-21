@@ -8,149 +8,142 @@
       <!-- Leaflet 0.5: https://github.com/CloudMade/Leaflet-->
 		<link rel="stylesheet" href="libs/leaflet.css" />
 		<!--[if lte IE 8]> <link rel="stylesheet" href="../../lib/leaflet.ie.css" />  <![endif]-->  
-		<script src="libs/leaflet-src.js"></script>
-
+		<script src="libs/leaflet.js"></script>
 		<link rel="stylesheet" href="libs/MarkerCluster.css" />
 		<link rel="stylesheet" href="libs/MarkerCluster.Default.css" />
 		<!--[if lte IE 8]> <link rel="stylesheet" href="../../lib/MarkerCluster.Default.ie.css" /> <![endif]-->
-		<script src="libs/leaflet.markercluster-src.js"></script>
-
-		<script src="libs/leaflet.geocsv-src.js"></script>
-
-		<!-- jQuery 1.8.3: http://jquery.com/ -->
-		<script src="libs/jquery.js"></script>
-
-		<style>	
-		html, body, #mapa {
-			margin: 0;
-			padding: 0;
-			width: 100%;
-			height: 100%;	
-			font-family: Arial, sans-serif;
-			font-color: #38383;
-		}
-
-		#botonera {
-			position:fixed;
-			top:10px;
-			left:50px;
-			z-index: 2;
-		}
-
-		#cargando {
-			position:fixed;
-			top:0;
-			left:0;
-			width:100%;
-			height:100%;
-			background-color:#666;
-			color:#fff;
-			font-size:2em;
-			padding:20% 40%;
-			z-index:10;
-		}
-
-		.boton {
-			border: 1px solid #96d1f8;
-			background: #65a9d7;
-			background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
-			background: -webkit-linear-gradient(top, #3e779d, #65a9d7);
-			background: -moz-linear-gradient(top, #3e779d, #65a9d7);
-			background: -ms-linear-gradient(top, #3e779d, #65a9d7);
-			background: -o-linear-gradient(top, #3e779d, #65a9d7);
-			padding: 12px 24px;
-			-webkit-border-radius: 10px;
-			-moz-border-radius: 10px;
-			border-radius: 10px;
-			-webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
-			-moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
-			box-shadow: rgba(0,0,0,1) 0 1px 0;
-			text-shadow: rgba(0,0,0,.4) 0 1px 0;
-			color: white;
-			font-size: 17px;
-			/*font-family: Helvetica, Arial, Sans-Serif;*/
-			text-decoration: none;
-			vertical-align: middle;
-		}
-		.boton:hover {
-			border-top-color: #28597a;
-			background: #28597a;
-			color: #ccc;
-		}
-		.boton:active {
-			border-top-color: #1b435e;
-			background: #1b435e;
-		}
-		</style>
+		<script src="libs/leaflet.markercluster.js"></script>
+		<script src="libs/shp/shp.js"></script>
+        <script src="libs/shp/catiline.js"></script>
+        <script src="libs/shp/leaflet.shpfile.js"></script>
+		<!-- <script src="libs/leaflet.geocsv-src.js"></script>
+		jQuery 1.8.3: http://jquery.com/ -->
+		<script src="libs/jquery.min.js"></script>
 	</head>
 	<body>
 		<div id="mapa"></div>
-		<div id="cargando"><a href="" target="_blank">
+		<div id="cargando"><a href="http://www.healthsourcechiro.com/" target="_blank">
              <img src="images/logo.png"  >
+          </a></div>
+        <div id="imageHC"><a href="http://www.healthsourcechiro.com/" target="_blank">
+             <img src="images/logo.png" style="height: 60px;">
           </a></div>
 
 		<div id="botonera">
 			<button id="localizame" class="boton">Where am I?</button>
 		</div>
-
+		<div id="uncluster">
+			<button id="checkCluster" class="boton">Ungroup Points</button>
+		</div>
 <script>
 
 var imgry   = L.tileLayer('http://{s}.tiles.mapbox.com/v3/asamap.map-p0q0dl08/{z}/{x}/{y}.png', {visible:false}),
     terr  = L.tileLayer('http://{s}.tiles.mapbox.com/v3/asamap.map-ijjg5918/{z}/{x}/{y}.png', {visible:false}),
-    asabase = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {visible:true});
-
+    asabase = L.tileLayer('http://ttiles01.mqcdn.com/tiles/1.0.0/vx/map/{z}/{x}/{y}.png', {visible:true});
 
     var baseMaps = {
-      "Imagery": imgry,
-      "Terrain": terr,
+      "Imagery": terr,
+      "Terrain": imgry,
       "Streets": asabase
     };
 
-var mapa = L.map('mapa', {attributionControl:false,layers: [asabase]}).setView([40.46, -3.75], 5);
+var mapa = L.map('mapa', {attributionControl:false,layers: [asabase]}).setView([41.642003,-72.81189], 8);
+L.control.layers(baseMaps).addTo(mapa);
 
-L.control.layers(baseMaps).addTo(this.map);
-
-var bankias = L.geoCsv(null, {
-	onEachFeature: function (feature, layer) {
-		var popup = '';
+var geojson;
+var cluster;
+var geojsonMarkerOptions = {
+    radius: 6,
+    fillColor: "#DF151A",
+    color: "#000",
+    weight: 1,
+    fillOpacity: 0.8
+};
+$.getJSON("data/points.geojson", function(data) {
+    geojson = L.geoJson(data, {
+      onEachFeature: function (feature, layer) {
+      	var popup = '<img src="images/favicon.png" style=""><br />';
 		for (var clave in feature.properties) {
-			var title = bankias.getPropertyTitle(clave);
-			popup += '<b>'+title+'</b><br />'+feature.properties[clave]+'<br /><br />';
+			var title = clave;
+			if(clave == 'Name' || clave == 'Company'||clave == 'Phone' || clave == 'Email' ||clave == 'Address' ||clave == 'City' ||clave == 'State')
+			popup += '<b>'+clave+':  </b>'+feature.properties[clave]+'<br />';
 		}
 		layer.bindPopup(popup);
-	},
-	pointToLayer: function (feature, latlng) {
-		return L.marker(latlng, {
-			icon:L.icon({
-				iconUrl: 'marcador-bankia.png',
-				shadowUrl: 'marker-shadow.png',
-				iconSize: [25,41],
-				shadowSize:   [41, 41],
-				shadowAnchor: [13, 20]
-			})
-		});
-	},
-	firstLineTitles: true
-});
+      },
 
-$.ajax ({
-	type:'GET',
-	dataType:'text',
-	url:'data/points.csv',
-   error: function() {
-     alert('No Points on Map!!');
-   },
-	success: function(csv) {
-      var cluster = new L.MarkerClusterGroup();
-		bankias.addData(csv);
-		cluster.addLayer(bankias);
-		mapa.addLayer(cluster);
-		//mapa.fitBounds(cluster.getBounds());
-	},
-   complete: function() {
-      $('#cargando').delay(500).fadeOut('slow');
-   }
-});
+	  pointToLayer: function (feature, latlng) {
+        	return L.circleMarker(latlng, geojsonMarkerOptions);
+      }
+    });
+    cluster = new L.MarkerClusterGroup();
+    var re = geojson;
+    cluster.addLayer(re);
+    cluster.addTo(mapa);
+    $('#cargando').delay(500).fadeOut('slow');
+  });
+
+//Counties
+var shpfile = new L.Shapefile('data/counties.zip',{onEachFeature:function(feature, layer) {
+		layer.options.weight = 3;
+		switch(feature.properties.STATE_NAME){
+			case 'Rhode Island':
+				layer.options.color = '#F5D908';
+				break;
+			case 'Connecticut':
+				layer.options.color = '#3EA033';
+				break;
+			case 'Massachusetts':
+				layer.options.color = '#D80351';
+				break;
+			case 'New York':
+				layer.options.color = '#00A3EE';
+				break;
+			default:
+				layer.options.color = '#CCCCCC';
+		}
+		
+    	if (feature.properties) {
+			layer.bindPopup(Object.keys(feature.properties).map(function(k){
+				return k + ": " + feature.properties[k] ;
+			}).join("<br />"),{maxHeight:200});
+    	}
+
+    	layer.on("mouseover", function (e) {
+        // Change the style to the highlighted version
+        //layer.setStyle(highlightStyle);
+        // Create a popup with a unique ID linked to this record
+	        var popup = $("<div></div>", {
+	            id: "popup-" + feature.properties.FIPS,
+	            css: {
+	                position: "absolute",
+	                bottom: "0px",
+	                right: "200px",
+	                zIndex: 1002,
+	                backgroundColor: "#3e779d",
+	                opacity: .8,
+	                borderRadius: 9,
+	                padding: "4px",
+	                border: "1px solid #ccc"
+	            }
+	        });
+	        // Insert a headline into that popup
+	        var hed = $("<div></div>", {
+	            text: "County:  " + feature.properties.NAME,
+	            css: {fontSize: '12px', color:'white',fontWeight:'bold',marginBottom: '3px'}
+	        }).appendTo(popup);
+	        // Add the popup to the map
+	        popup.appendTo("#mapa");
+      });
+      // Create a mouseout event that undoes the mouseover changes
+      layer.on("mouseout", function (e) {
+        // Start by reverting the style back
+        //layer.setStyle(defaultStyle); 
+        // And then destroying the popup
+        $("#popup-" + feature.properties.FIPS).remove();
+      });
+
+	}});
+    shpfile.addTo(mapa);
 
 $('#localizame').click(function(e) {
 	mapa.locate();
@@ -161,7 +154,18 @@ $('#localizame').click(function(e) {
 	});
 });
 
-</script>
+$('#checkCluster').click(function(e) {
+	if(this.innerText == "Ungroup Points"){
+		$('#checkCluster').text('Group Points');
+		geojson.addTo(mapa);
+		mapa.removeLayer(cluster);
+	}else{
+		$('#checkCluster').text('Ungroup Points');
+		mapa.removeLayer(geojson);
+		cluster.addTo(mapa);
+	}
+});
 
+</script>
 </body>
 </html>

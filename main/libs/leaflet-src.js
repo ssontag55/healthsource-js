@@ -1206,15 +1206,20 @@ L.Projection.SphericalMercator = {
 	MAX_LATITUDE: 85.0511287798,
 
 	project: function (latlng) { // (LatLng) -> Point
-		var d = L.LatLng.DEG_TO_RAD,
+		if(!latlng){
+			return new L.Point(0, 0);
+		}
+		else{
+			var d = L.LatLng.DEG_TO_RAD,
 		    max = this.MAX_LATITUDE,
 		    lat = Math.max(Math.min(max, latlng.lat), -max),
 		    x = latlng.lng * d,
 		    y = lat * d;
 
-		y = Math.log(Math.tan((Math.PI / 4) + (y / 2)));
+			y = Math.log(Math.tan((Math.PI / 4) + (y / 2)));
 
-		return new L.Point(x, y);
+			return new L.Point(x, y);
+		}
 	},
 
 	unproject: function (point) { // (Point, Boolean) -> LatLng
@@ -2972,11 +2977,11 @@ L.icon = function (options) {
 L.Icon.Default = L.Icon.extend({
 
 	options: {
-		iconSize: new L.Point(25, 41),
-		iconAnchor: new L.Point(12, 41),
-		popupAnchor: new L.Point(1, -34),
+		/*iconSize: new L.Point(25, 41),
+		iconAnchor: new L.Point(12, 41),*/
+		popupAnchor: new L.Point(1, 1),
 
-		shadowSize: new L.Point(41, 41)
+		shadowSize: new L.Point(0, 0)
 	},
 
 	_getIconUrl: function (name) {

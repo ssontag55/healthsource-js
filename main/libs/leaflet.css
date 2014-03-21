@@ -1,5 +1,76 @@
-/* required styles */
+/*appmap styles */
+html, body, #mapa {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;	
+			font-family: Arial, sans-serif;
+			font-color: #38383;
+		}
+		#botonera {
+			position:fixed;
+			bottom:0px;
+			right:0px;
+			z-index: 2;
+		}
+		#uncluster {
+			position:fixed;
+			bottom:0px;
+			right:90px;
+			z-index: 2;
+		}
+		#cargando {
+			position:fixed;
+			top:0;
+			left:0;
+			width:100%;
+			height:100%;
+			background-color:#666;
+			color:#fff;
+			font-size:2em;
+			padding:20% 40%;
+			z-index:10;
+		}
 
+		#imageHC {
+			position:fixed;
+			bottom:0;
+			left:0;
+			height:60px;
+		}
+		.boton {
+			border: 1px solid #96d1f8;
+			background: #65a9d7;
+			background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+			background: -webkit-linear-gradient(top, #3e779d, #65a9d7);
+			background: -moz-linear-gradient(top, #3e779d, #65a9d7);
+			background: -ms-linear-gradient(top, #3e779d, #65a9d7);
+			background: -o-linear-gradient(top, #3e779d, #65a9d7);
+			padding: 4px 6px;
+			-webkit-border-radius: 10px;
+			-moz-border-radius: 10px;
+			border-radius: 10px;
+			-webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+			-moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+			box-shadow: rgba(0,0,0,1) 0 1px 0;
+			text-shadow: rgba(0,0,0,.4) 0 1px 0;
+			color: white;
+			font-size: 12px;
+			/*font-family: Helvetica, Arial, Sans-Serif;*/
+			text-decoration: none;
+			vertical-align: middle;
+		}
+		.boton:hover {
+			border-top-color: #28597a;
+			background: #28597a;
+			color: #ccc;
+		}
+		.boton:active {
+			border-top-color: #1b435e;
+			background: #1b435e;
+		}
+
+/* required styles */
 .leaflet-map-pane,
 .leaflet-tile,
 .leaflet-marker-icon,
@@ -245,7 +316,9 @@
 .leaflet-control-layers-toggle {
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
+	background-color: lightslategrey;
 	display: block;
+	border-radius: 5px;
 	}
 .leaflet-control-zoom a:hover {
 	background-color: #fff;
